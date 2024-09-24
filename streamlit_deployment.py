@@ -9,8 +9,8 @@ required_order = ['Miscellaneous_Gear Box', 'Year of Manufacture', 'Max Power', 
                   'Mileage', 'Kms Driven', 'Transmission', 'model', 'city',
                   'Engine Displacement', 'Miscellaneous_Rear Brake Type',
                   'Miscellaneous_Tyre Type', 'Features', 'oem', 'Seats',
-                  'Engine and Transmission_Fuel Suppy System', 'bt', 'ownerNo',
-                  'Miscellaneous_Front Brake Type', 'Insurance Validity']
+                  'Engine and Transmission_Fuel Suppy System', 'bt', 'ownerNo', 'Insurance Validity',
+                  'Miscellaneous_Front Brake Type']
 
 st.title("Welcome To Car price prediction Application")
 with st.sidebar:
@@ -75,29 +75,3 @@ if st.button('Predict'):
 
     # Display the prediction
     st.write(f"The predicted car price is: {prediction}")
-# with open('best_model.pkl', 'rb') as file:
-#     result = pickle.load(file)
-#
-# x = [5.0,
-#      18.0,
-#      392.0,
-#      30.0,
-#      352.0,
-#      29000.0,
-#      1.0,
-#      5.0,
-#      78.0,
-#      12.0,
-#      7.0,
-#      23.0,
-#      1.0,
-#      9.0,
-#      5.0,
-#      81.0,
-#      2.0,
-#      1.0,
-#      5.0,
-#      5.0]
-# print(x)
-# prediction = result.predict([x])
-# print(prediction)
