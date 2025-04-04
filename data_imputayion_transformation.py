@@ -1,77 +1,131 @@
-import pickle
-import streamlit as st
 import pandas as pd
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.preprocessing import LabelEncoder
+import pickle
 
-# from streamlit_option_menu import option_menu
+def value_vectorizer(df1):
+    vectorizer = CountVectorizer()
+    encoded_features = vectorizer.fit_transform(df1).toarray()
 
-user_input = {}
-required_order = ['Miscellaneous_Gear Box', 'Year of Manufacture', 'Max Power', 'Torque',
-                  'Mileage', 'Kms Driven', 'Transmission', 'model', 'city',
-                  'Engine Displacement', 'Miscellaneous_Rear Brake Type',
-                  'Miscellaneous_Tyre Type', 'Features', 'oem', 'Seats',
-                  'Engine and Transmission_Fuel Suppy System', 'bt', 'ownerNo', 'Insurance Validity',
-                  'Miscellaneous_Front Brake Type']
+    kmeans = KMeans(n_clusters=3, random_state=42)  # Example: 3 clusters
+    clusters = kmeans.fit_predict(encoded_features)
 
-st.title("Welcome To Car price prediction Application")
-with st.sidebar:
-    st.write("You Can select the preferred options and calculate the car price")
-    with open('mappings.pkl', 'rb') as file:
-        mappings = pickle.load(file)
-    for col, mapping in mappings.items():
+    df['Cluster'] = clusters
+    df1 = df['Cluster']
+    return df1
 
-        user_input[col] = st.selectbox(
-            f"Select a {col}:",
-            list(mapping.keys())  # Show original category names
-        )
-    encoded_inputs = {}
-    for col, value in user_input.items():
-        encoded_inputs[col] = mappings[col][value]
 
-    km = [1000, 5000, 50000, 100000, 150000, 200000, 250000, 300000, 350000, 400000, 450000, 500000, 550000, 600000,
-          650000, 700000, 750000, 800000, 850000, 900000, 950000, 1000000, 1050000, 1100000, 1150000, 1200000, 1250000,
-          1300000, 1350000, 1400000, 1450000, 1500000, 1550000, 1600000, 1650000, 1700000, 1750000, 1800000, 1850000,
-          1900000, 1950000, 2000000, 2050000, 2100000, 2150000, 2200000, 2250000, 2300000, 2350000, 2400000, 2450000,
-          2500000, 2550000, 2600000, 2650000, 2700000, 2750000, 2800000, 2850000, 2900000, 2950000, 3000000, 3050000,
-          3100000, 3150000, 3200000, 3250000, 3300000, 3350000, 3400000, 3450000, 3500000, 3550000, 3600000, 3650000,
-          3700000, 3750000, 3800000, 3850000, 3900000, 3950000, 4000000, 4050000, 4100000, 4150000, 4200000, 4250000,
-          4300000, 4350000, 4400000, 4450000, 4500000, 4550000, 4600000, 4650000, 4700000, 4750000, 4800000, 4850000,
-          4900000, 4950000, 5000000, 5050000, 5100000, 5150000, 5200000, 5250000, 5300000, 5350000, 5400000, 5450000,
-          5500000
-          ]
+df = pd.read_excel(r"concated_cars.xlsx")
 
-    seats = [5, 7, 8, 6, 10, 4, 9, 2]
-    gears = [9, 8, 4, 6, 5, 7, 1]
-    owner = [3, 1, 2, 4, 0, 5]
 
-    Km_input = st.selectbox(
-        f"Select a Kms driven:",
-        list(km)  # Show original category names
-    )
-    seat_input = st.selectbox(
-        f"Select a No. of Seats:",
-        list(seats)  # Show original category names
-    )
-    gears_input = st.selectbox(
-        f"Select a No. of Gears:",
-        list(gears)  # Show original category names
-    )
-    owner_input = st.selectbox(
-        f"Select a No. of Owners:",
-        list(owner)  # Show original category names
-    )
-    encoded_inputs['Kms Driven'] = Km_input
-    encoded_inputs['Seats'] = seat_input
-    encoded_inputs['Miscellaneous_Gear Box'] = gears_input
-    encoded_inputs['ownerNo'] = owner_input
-    print(encoded_inputs)
+df['Kms Driven'] = [str(i).split()[0] for i in df['Kms Driven']]
+df['Kms Driven'] = df['Kms Driven'].str.replace(',', '').astype(float)
+df['price'] = [i.split()[1] for i in df['price']]
+df['price'] = df['price'].str.replace(',', '').astype(float)
+df['Engine Displacement'] = [str(i).split()[0] for i in df['Engine Displacement']]
+df['Mileage'] = [str(i).split()[0] for i in df['Mileage']]
 
-ordered_encoded_inputs = [encoded_inputs[col] for col in required_order]
-input_data = pd.DataFrame([ordered_encoded_inputs], columns=required_order)
-if st.button('Predict'):
-    with open('best_model.pkl', 'rb') as file:
-       result = pickle.load(file)
-    # Predict using the model
-    prediction = result.predict(input_data)
+for i in df['price']:
+    if i > 1000:
+        i1 = i / 100000
+        df['price'].replace(i, i1, inplace=True)
 
-    # Display the prediction
-    st.write(f"The predicted car price is: {prediction}")
+for i in df['Max Power']:
+    if len(str(i)) > 10:
+        df['Max Power'].replace(i, np.nan, inplace=True)
+    i1 = ''.join([char for char in str(i) if char.isdigit() or char == '.'])
+    df['Max Power'].replace(i, i1, inplace=True)
+
+for i in df['Torque']:
+    i1 = ''.join([char for char in str(i) if char.isdigit() or char == '.'])
+    df['Torque'].replace(i, i1, inplace=True)
+
+for i in df['Miscellaneous_Gear Box']:
+    i1 = ''.join([char for char in str(i) if char.isdigit() or char == '.'])
+    if i1:
+        i1=i1[0]
+    df['Miscellaneous_Gear Box'].replace(i, i1, inplace=True)
+
+for i in df['Miscellaneous_Drive Type']:
+    if i == "AWD" or i == "4WD" or i == "4X4" or i == "Permanent all-wheel drive quattro":
+        df['Miscellaneous_Drive Type'].replace(i, "Four Wheel Drive", inplace=True)
+    else:
+        df['Miscellaneous_Drive Type'].replace(i, "Two Wheel Drive", inplace=True)
+
+for i in df['Miscellaneous_Cargo Volumn']:
+    i1 = ''.join([char for char in str(i) if char.isdigit() or char == '.'])
+    df['Miscellaneous_Cargo Volumn'].replace(i, i1, inplace=True)
+
+for i in df['Miscellaneous_Top Speed']:
+    i1 = ''.join([char for char in str(i) if char.isdigit() or char == '.'])
+    df['Miscellaneous_Top Speed'].replace(i, i1, inplace=True)
+
+
+
+df['Comfort & Convenience'] = value_vectorizer(df['Comfort & Convenience'])
+df['Interior'] = value_vectorizer(df['Interior'])
+df['Exterior'] = value_vectorizer(df['Exterior'])
+df['Safety'] = value_vectorizer(df['Safety'])
+df['Entertainment & Communication'].ffill(inplace=True)
+df['Entertainment & Communication'] = value_vectorizer(df['Entertainment & Communication'])
+
+df.drop(['Miscellaneous_Top Speed', 'Miscellaneous_Cargo Volumn'], axis=1, inplace=True)
+
+# Mean imputaion for missing regression value
+
+df['Kms Driven'] = df['Kms Driven'].fillna(df['Kms Driven'].mean())
+
+
+# Mode imputation for the missing categorical data
+
+df['Year of Manufacture'] = df['Year of Manufacture'].fillna(df['Year of Manufacture'].mode()[0])
+df['Seats'] = df['Seats'].fillna(df['Seats'].mode()[0])
+df['Miscellaneous_Gear Box'] = df['Miscellaneous_Gear Box'].fillna(df['Miscellaneous_Gear Box'].mode()[0])
+df['Engine and Transmission_No of Cylinder'] = df['Engine and Transmission_No of Cylinder'].fillna(
+    df['Engine and Transmission_No of Cylinder'].mode()[0])
+df['Engine and Transmission_Values per Cylinder'] = df['Engine and Transmission_Values per Cylinder'].fillna(
+    df['Engine and Transmission_Values per Cylinder'].mode()[0])
+df['Miscellaneous_No Door Numbers'] = df['Miscellaneous_No Door Numbers'].fillna(
+    df['Miscellaneous_No Door Numbers'].mode()[0])
+df['Engine Displacement'] = df['Engine Displacement'].fillna(df['Engine Displacement'].mode()[0])
+df['Mileage'] = df['Mileage'].fillna(df['Mileage'].mode()[0])
+df['Max Power'] = df['Max Power'].fillna(df['Max Power'].mode()[0])
+df['Torque'] = df['Torque'].fillna(df['Torque'].mode()[0])
+
+model = LabelEncoder()
+# Create a dictionary to store all the mappings
+mappings = {}
+
+# List of columns to encode
+columns_to_encode = [
+    'bt', 'oem', 'Year of Manufacture', 'model', 'Insurance Validity', 'Fuel Type',
+    'Transmission', 'Max Power', 'Torque', 'Mileage', 'Engine Displacement',
+    'Engine and Transmission_Value Configuration', 'Engine and Transmission_Fuel Suppy System',
+    'Miscellaneous_Drive Type', 'Miscellaneous_Steering Type', 'Miscellaneous_Front Brake Type',
+    'Miscellaneous_Rear Brake Type', 'Miscellaneous_Tyre Type', 'city'
+]
+
+# Create mappings and apply label encoding
+for col in columns_to_encode:
+    mappings[col] = dict(zip(df[col], model.fit_transform(df[col])))
+    df[col] = model.transform(df[col])
+
+mappings['Features'] = dict(zip(df['Features'], value_vectorizer(df['Features'])))
+df['Features'] = value_vectorizer(df['Features'])
+
+mappings.pop('Fuel Type')
+mappings.pop('Engine and Transmission_Value Configuration')
+mappings.pop('Miscellaneous_Drive Type')
+mappings.pop('Miscellaneous_Steering Type')
+
+for col, mapping in mappings.items():
+    print(f"Mapping for {col}: {mapping}")
+
+with open('mappings.pkl','wb') as file:
+    pickle.dump(mappings,file)
+
+df.drop(['Cluster'], axis=1, inplace=True)
+
+df.to_excel("Transformed_data.xlsx",index=False)
