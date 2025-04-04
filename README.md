@@ -1,4 +1,32 @@
+Car-Dheko — Used Car Price Prediction
+🚗 Project Overview
+This project aims to predict the selling price of used cars based on various features like the year of manufacture, fuel type, transmission, ownership history, etc. The goal is to build an accurate machine learning model that can assist buyers and sellers in making informed pricing decisions.
 
+💡 Features
+Data preprocessing and cleaning
+
+Handling missing values and outliers
+
+Feature engineering and transformation
+
+Model building using regression techniques
+
+Streamlit-based web app for easy interaction and deployment
+
+🛠️ Installation Instructions
+Clone the repository:
+
+bash
+Copy
+Edit
+git clone https://github.com/harivelmurugan15/Car-Dheko---Used-Car-Price-Prediction.git
+cd Car-Dheko---Used-Car-Price-Prediction
+Create and activate a virtual environment:
+
+bash
+Copy
+Edit
+python -m venv venv
 source venv/bin/activate  # or venv\Scripts\activate on Windows
 Install dependencies:
 
